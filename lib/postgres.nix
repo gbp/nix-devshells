@@ -16,7 +16,7 @@ in {
         # PostgreSQL configuration (Unix socket) - paths derived from PWD
         export PGDATA="$PWD/.postgres/data"
         export PGHOST="$PWD/.postgres/sockets"
-        export DATABASE_URL="postgresql:///postgres?host=$PGHOST"
+        export DATABASE_URL="postgresql:///$USER?host=$PGHOST"
 
         # Initialize PostgreSQL if needed
         if [ ! -d "$PGDATA" ]; then
@@ -27,6 +27,8 @@ in {
     listen_addresses = '''
     unix_socket_directories = '$PGHOST'
     PGCONF
+          # Create a default database for the current user
+          echo "CREATE DATABASE $USER;" | postgres --single -E postgres
         fi
 
         # Ensure socket directory exists
