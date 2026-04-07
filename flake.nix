@@ -16,6 +16,7 @@
       withPostgres = args: import ./lib/postgres.nix args;
       withPython = args: import ./lib/python.nix args;
       withRuby = args: import ./lib/ruby.nix args;
+      withRedis = args: import ./lib/redis.nix args;
       withRust = args: import ./lib/rust.nix args;
 
       mkDevShell = {

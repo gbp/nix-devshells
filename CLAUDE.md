@@ -9,7 +9,7 @@ nix-devshells is a Nix flake library that provides composable dev shell helpers.
 ## Architecture
 
 `flake.nix` exposes `lib` with:
-- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRust`, `withPerl` — each imports its corresponding `lib/*.nix`
+- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it.
 
 Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
@@ -23,11 +23,12 @@ Versions are passed as human-readable strings and parsed to nixpkgs attribute na
 - **Node**: `"22.1.0"` → `pkgs.nodejs_22` (major only via `builtins.head (builtins.splitVersion ...)`)
 - **Python**: `"3.12"` → `pkgs.python312` (major+minor concatenated, no separator)
 - **Postgres**: `"16.2"` → `pkgs.postgresql_16` (major only)
+- **Redis**: `"latest"` uses `pkgs.redis`, otherwise version-specific attribute
 - **Rust/Perl**: `"latest"` uses default package, otherwise version-specific attribute
 
 ### Dependency paths
 
-All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exception: Postgres uses `$PWD/.postgres/` for per-project data/socket isolation.
+All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` and Redis uses `$PWD/.redis/` for per-project data/socket isolation.
 
 ### Helper structure
 

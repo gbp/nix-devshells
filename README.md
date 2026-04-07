@@ -52,6 +52,7 @@ nix develop
 | `withPerl` | `version` | `"latest"` | `"latest"` |
 | `withPostgres` | `version` | `"16"` | `"17"`, `"15.2"` |
 | `withPython` | `version` | `"3.13"` | `"3.12"`, `"3.11.5"` |
+| `withRedis` | `version` | `"latest"` | `"latest"` |
 | `withRuby` | `version` | `"4.0"` | `"4.0.2"`, `"3.3.0"` |
 | `withRust` | `version` | `"latest"` | `"latest"` |
 
@@ -75,6 +76,7 @@ A `$FLAKE_ROOT` variable is set automatically, pointing to the directory contain
 | Perl | `$FLAKE_ROOT/.perl5/` |
 | Postgres | `$PWD/.postgres/` |
 | Python | `$FLAKE_ROOT/.venv/` |
+| Redis | `$PWD/.redis/` |
 | Ruby | `$FLAKE_ROOT/.gems/` |
 | Rust | `$FLAKE_ROOT/.cargo/` |
 
