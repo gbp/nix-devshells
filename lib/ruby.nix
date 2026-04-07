@@ -2,8 +2,12 @@
 {
   pkgs,
   version ? "4.0",
+  package ? null,
 }: let
-  rubyPackage = pkgs."ruby-${version}";
+  rubyPackage =
+    if package != null
+    then package
+    else pkgs."ruby-${version}";
   versionSplit = builtins.splitVersion version;
   rubyMajorMinor = "${builtins.elemAt versionSplit 0}.${builtins.elemAt versionSplit 1}.0";
 in {

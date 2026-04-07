@@ -57,6 +57,8 @@ nix develop
 
 Versions are parsed automatically -- pass natural version strings like `"3.12.1"` and the correct nixpkgs package is resolved.
 
+All helpers also accept an optional `package` argument to use a custom package directly (e.g. from an older nixpkgs). When `package` is set, `version` is ignored. Rust additionally accepts `cargoPackage`.
+
 Ruby versions are provided by [nixpkgs-ruby](https://github.com/bobvanderlinden/nixpkgs-ruby) and support exact version pinning.
 
 ## How it works
@@ -93,6 +95,7 @@ nix-devshells.lib.mkDevShell {
 
 ## Examples
 
+- [`examples/custom-postgres/`](examples/custom-postgres/) -- PostgreSQL 13 from an older nixpkgs with Redis
 - [`examples/full-stack/`](examples/full-stack/) -- Ruby, Python, Node, Postgres
 - [`examples/monorepo/`](examples/monorepo/) -- shared shell with nested projects using `source_up` in direnv
 - [`examples/ruby-only/`](examples/ruby-only/) -- just Ruby

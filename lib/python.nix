@@ -2,11 +2,15 @@
 {
   pkgs,
   version ? "3.13",
+  package ? null,
 }: let
   versionParts = builtins.splitVersion version;
   major = builtins.elemAt versionParts 0;
   minor = builtins.elemAt versionParts 1;
-  pythonPackage = pkgs."python${major}${minor}";
+  pythonPackage =
+    if package != null
+    then package
+    else pkgs."python${major}${minor}";
 in {
   packages = [
     pythonPackage

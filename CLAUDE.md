@@ -12,7 +12,7 @@ nix-devshells is a Nix flake library that provides composable dev shell helpers.
 - `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRust`, `withPerl` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it.
 
-Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default> } -> { packages, shellHook, ... }`. They are independent and composable in any combination.
+Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
 
 ## Conventions
 

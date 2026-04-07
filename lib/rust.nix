@@ -2,19 +2,25 @@
 {
   pkgs,
   version ? "latest",
+  package ? null,
+  cargoPackage ? null,
 }: let
   rustPackage =
-    if version == "latest"
+    if package != null
+    then package
+    else if version == "latest"
     then pkgs.rustc
     else pkgs."rust_${builtins.replaceStrings ["."] ["_"] version}";
-  cargoPackage =
-    if version == "latest"
+  resolvedCargoPackage =
+    if cargoPackage != null
+    then cargoPackage
+    else if version == "latest"
     then pkgs.cargo
     else pkgs."cargo_${builtins.replaceStrings ["."] ["_"] version}";
 in {
   packages = [
     rustPackage
-    cargoPackage
+    resolvedCargoPackage
     pkgs.clippy
     pkgs.rustfmt
     pkgs.pkg-config
@@ -31,5 +37,5 @@ in {
 
   # Expose for consumers
   rust = rustPackage;
-  cargo = cargoPackage;
+  cargo = resolvedCargoPackage;
 }

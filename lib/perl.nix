@@ -2,9 +2,12 @@
 {
   pkgs,
   version ? "latest",
+  package ? null,
 }: let
   perlPackage =
-    if version == "latest"
+    if package != null
+    then package
+    else if version == "latest"
     then pkgs.perl
     else pkgs."perl${builtins.replaceStrings ["."] [""] version}";
 in {

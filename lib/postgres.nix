@@ -2,9 +2,13 @@
 {
   pkgs,
   version ? "16",
+  package ? null,
 }: let
   major = builtins.head (builtins.splitVersion version);
-  postgresPackage = pkgs."postgresql_${major}";
+  postgresPackage =
+    if package != null
+    then package
+    else pkgs."postgresql_${major}";
 in {
   packages = [postgresPackage];
 

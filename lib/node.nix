@@ -2,9 +2,13 @@
 {
   pkgs,
   version ? "24",
+  package ? null,
 }: let
   major = builtins.head (builtins.splitVersion version);
-  nodePackage = pkgs."nodejs_${major}";
+  nodePackage =
+    if package != null
+    then package
+    else pkgs."nodejs_${major}";
 in {
   packages = [nodePackage];
 
