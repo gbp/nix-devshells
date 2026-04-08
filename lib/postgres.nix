@@ -34,29 +34,36 @@ in {
         # Ensure socket directory exists
         mkdir -p "$PGHOST"
 
-        # Helper functions
-        pg_start() {
-          if ! pg_isready -q; then
-            echo "Starting PostgreSQL..."
-            pg_ctl -D "$PGDATA" -l "$PGDATA/postgresql.log" start
-          else
-            echo "PostgreSQL is already running"
-          fi
-        }
+        # Helper scripts (shell-agnostic, works in bash and zsh)
+        export _PG_BIN="$PWD/.postgres/bin"
+        mkdir -p "$_PG_BIN"
 
-        pg_stop() {
-          if pg_isready -q; then
-            echo "Stopping PostgreSQL..."
-            pg_ctl -D "$PGDATA" stop
-          else
-            echo "PostgreSQL is not running"
-          fi
-        }
+        cat > "$_PG_BIN/pg_start" <<'PGSCRIPT'
+    #!/usr/bin/env bash
+    if ! pg_isready -h "$PGHOST" -q; then
+      echo "Starting PostgreSQL..."
+      pg_ctl -D "$PGDATA" -l "$PGDATA/postgresql.log" start
+    else
+      echo "PostgreSQL is already running"
+    fi
+    PGSCRIPT
 
-        pg_status() {
-          pg_isready
-        }
+        cat > "$_PG_BIN/pg_stop" <<'PGSCRIPT'
+    #!/usr/bin/env bash
+    if pg_isready -h "$PGHOST" -q; then
+      echo "Stopping PostgreSQL..."
+      pg_ctl -D "$PGDATA" stop
+    else
+      echo "PostgreSQL is not running"
+    fi
+    PGSCRIPT
 
-        export -f pg_start pg_stop pg_status
+        cat > "$_PG_BIN/pg_status" <<'PGSCRIPT'
+    #!/usr/bin/env bash
+    pg_isready -h "$PGHOST"
+    PGSCRIPT
+
+        chmod +x "$_PG_BIN"/{pg_start,pg_stop,pg_status}
+        export PATH="$_PG_BIN:$PATH"
   '';
 }
