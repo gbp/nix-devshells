@@ -16,7 +16,6 @@ in {
         # PostgreSQL configuration (Unix socket) - paths derived from PWD
         export PGDATA="$PWD/.postgres/data"
         export PGHOST="$PWD/.postgres/sockets"
-        export DATABASE_URL="postgresql:///$USER?host=$PGHOST"
 
         # Initialize PostgreSQL if needed
         if [ ! -d "$PGDATA" ]; then
