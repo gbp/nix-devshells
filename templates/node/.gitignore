@@ -1,0 +1,3 @@
+.direnv/
+.npm-global/
+node_modules/

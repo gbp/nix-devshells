@@ -51,5 +51,29 @@
     };
 
     overlays.default = nixpkgs-ruby.overlays.default;
+
+    templates = rec {
+      full = {
+        path = ./templates/full;
+        description = "Full-stack dev shell: Ruby, Python, Node, Postgres";
+      };
+      node = {
+        path = ./templates/node;
+        description = "Node.js dev shell";
+      };
+      python = {
+        path = ./templates/python;
+        description = "Python dev shell";
+      };
+      ruby = {
+        path = ./templates/ruby;
+        description = "Ruby dev shell";
+      };
+      rust = {
+        path = ./templates/rust;
+        description = "Rust dev shell";
+      };
+      default = full;
+    };
   };
 }

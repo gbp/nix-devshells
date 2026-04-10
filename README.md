@@ -95,6 +95,30 @@ nix-devshells.lib.mkDevShell {
 };
 ```
 
+## Templates
+
+Scaffold a new project with a ready-to-use `flake.nix`, `.envrc`, and `.gitignore`:
+
+```sh
+nix flake init --template github:gbp/nix-devshells#full
+```
+
+Available templates:
+
+| Template | Contents |
+|---|---|
+| `full` (default) | Ruby, Python, Node, Postgres |
+| `node` | Node.js |
+| `python` | Python |
+| `ruby` | Ruby |
+| `rust` | Rust |
+
+Running without `#<name>` uses `full`:
+
+```sh
+nix flake init --template github:gbp/nix-devshells
+```
+
 ## Examples
 
 - [`examples/custom-postgres/`](examples/custom-postgres/) -- PostgreSQL 13 from an older nixpkgs with Redis

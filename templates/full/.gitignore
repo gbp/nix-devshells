@@ -1,0 +1,6 @@
+.direnv/
+.gems/
+.npm-global/
+.postgres/
+.redis/
+.venv/
