@@ -28,7 +28,7 @@ Versions are passed as human-readable strings and parsed to nixpkgs attribute na
 
 ### Dependency paths
 
-All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` and Redis uses `$PWD/.redis/` for per-project data/socket isolation.
+All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` for data and `/tmp/nix-pg-<hash>` for sockets (to avoid macOS 103-byte Unix socket path limit). Redis uses `$PWD/.redis/` for per-project data/socket isolation.
 
 ### Helper structure
 

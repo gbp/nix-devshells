@@ -15,7 +15,9 @@ in {
   shellHook = ''
         # PostgreSQL configuration (Unix socket) - paths derived from PWD
         export PGDATA="$PWD/.postgres/data"
-        export PGHOST="$PWD/.postgres/sockets"
+        # Use /tmp for sockets to avoid macOS 103-byte Unix socket path limit
+        _pg_hash=$(printf '%s' "$PWD" | shasum -a 256 | cut -c1-16)
+        export PGHOST="/tmp/nix-pg-$_pg_hash"
 
         # Initialize PostgreSQL if needed
         if [ ! -d "$PGDATA" ]; then
@@ -32,6 +34,12 @@ in {
 
         # Ensure socket directory exists
         mkdir -p "$PGHOST"
+
+        # Update socket path in existing config (handles migration from old $PWD-based paths)
+        if [ -f "$PGDATA/postgresql.conf" ]; then
+          sed -i.bak "s|^unix_socket_directories = .*|unix_socket_directories = '$PGHOST'|" "$PGDATA/postgresql.conf"
+          rm -f "$PGDATA/postgresql.conf.bak"
+        fi
 
         # Helper scripts (shell-agnostic, works in bash and zsh)
         export _PG_BIN="$PWD/.postgres/bin"
