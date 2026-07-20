@@ -6,6 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 nix-devshells is a Nix flake library that provides composable dev shell helpers. Consumers add it as a flake input and compose features via `mkDevShell`.
 
+## Commands
+
+There is no test suite or CI. Validate changes by evaluating the flake and entering shells:
+
+```sh
+nix flake check                          # evaluate flake outputs (catches eval errors)
+nix develop                              # enter the repo's own dev shell
+nix flake init --template ./#full        # scaffold from a template into an empty dir
+nix-shell -p alejandra --run 'alejandra .'   # format all Nix files
+```
+
+To exercise a helper end-to-end, scaffold or open one of the `examples/` projects and run `nix develop` there; service helpers (Postgres/Redis) then expose `pg_start`/`redis_start` etc. on `$PATH`.
+
 ## Architecture
 
 `flake.nix` exposes `lib` with:
@@ -33,6 +46,14 @@ All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gem
 ### Helper structure
 
 Every helper sets `${LANG}_APP_ROOT="$FLAKE_ROOT"`, configures paths, and prepends bins to `$PATH`. Ruby additionally unsets system gem variables for full isolation.
+
+### Service helpers (Postgres, Redis)
+
+Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<service>/bin/` and prepend that dir to `$PATH`, giving the user lifecycle commands: `pg_start`/`pg_stop`/`pg_status` and `redis_start`/`redis_stop`/`redis_status`. Scripts are written with `cat > … <<'SCRIPT'` (quoted heredoc, so `$VAR` stays literal and resolves at call time). The service is **not** auto-started on shell entry — only initialized. Postgres creates a default database named after `$USER`; Redis listens on a Unix socket only and exports `REDIS_URL`. Postgres `shellHook` also migrates pre-existing configs to the new `/tmp` socket path via `sed`.
+
+### Rust specifics
+
+`withRust` also accepts `cargoPackage` (separate cargo override) and re-exports `rust`/`cargo` attributes for consumers. It bundles `clippy`, `rustfmt`, `pkg-config`, and `openssl_3` alongside the toolchain.
 
 ## Adding a new helper
 
