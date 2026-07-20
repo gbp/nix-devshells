@@ -55,12 +55,29 @@ nix develop
 | `withRedis` | `version` | `"latest"` | `"latest"` |
 | `withRuby` | `version` | `"4.0"` | `"4.0.2"`, `"3.3.0"` |
 | `withRust` | `version` | `"latest"` | `"latest"` |
+| `withSwift` | `version` | `"latest"` | `"latest"` |
 
 Versions are parsed automatically -- pass natural version strings like `"3.12.1"` and the correct nixpkgs package is resolved.
 
 All helpers also accept an optional `package` argument to use a custom package directly (e.g. from an older nixpkgs). When `package` is set, `version` is ignored. Rust additionally accepts `cargoPackage`.
 
 Ruby versions are provided by [nixpkgs-ruby](https://github.com/bobvanderlinden/nixpkgs-ruby) and support exact version pinning.
+
+### macOS GUI apps with Swift
+
+`withSwift` provides the Swift toolchain (`swift`, `swiftpm`) plus `swiftformat` and `swiftlint`. Pass `gui = true` to build SwiftUI/AppKit apps without Xcode — it adds the macOS SDK frameworks so `import SwiftUI` links against the system frameworks:
+
+```nix
+(nix-devshells.lib.withSwift {inherit pkgs; gui = true;})
+```
+
+This is darwin-only. The nixpkgs Swift toolchain omits `dsymutil`, so build with debug symbols disabled:
+
+```sh
+swift build -Xswiftc -gnone
+```
+
+You get a runnable executable, but not the Xcode IDE features: Interface Builder (`.storyboard`/`.xib`), asset catalogs (`.xcassets`), live Previews, or the Simulator. Write your UI in pure Swift code to stay within these bounds.
 
 ## How it works
 

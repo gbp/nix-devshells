@@ -18,6 +18,7 @@
       withRuby = args: import ./lib/ruby.nix args;
       withRedis = args: import ./lib/redis.nix args;
       withRust = args: import ./lib/rust.nix args;
+      withSwift = args: import ./lib/swift.nix args;
 
       mkDevShell = {
         pkgs,

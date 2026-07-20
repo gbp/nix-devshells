@@ -22,7 +22,7 @@ To exercise a helper end-to-end, scaffold or open one of the `examples/` project
 ## Architecture
 
 `flake.nix` exposes `lib` with:
-- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl` — each imports its corresponding `lib/*.nix`
+- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it.
 
 Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
@@ -37,7 +37,7 @@ Versions are passed as human-readable strings and parsed to nixpkgs attribute na
 - **Python**: `"3.12"` → `pkgs.python312` (major+minor concatenated, no separator)
 - **Postgres**: `"16.2"` → `pkgs.postgresql_16` (major only)
 - **Redis**: `"latest"` uses `pkgs.redis`, otherwise version-specific attribute
-- **Rust/Perl**: `"latest"` uses default package, otherwise version-specific attribute
+- **Rust/Perl/Swift**: `"latest"` uses default package, otherwise version-specific attribute (nixpkgs ships a single `swift`, so Swift is effectively always `latest` unless `package` is given)
 
 ### Dependency paths
 
@@ -50,6 +50,10 @@ Every helper sets `${LANG}_APP_ROOT="$FLAKE_ROOT"`, configures paths, and prepen
 ### Service helpers (Postgres, Redis)
 
 Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<service>/bin/` and prepend that dir to `$PATH`, giving the user lifecycle commands: `pg_start`/`pg_stop`/`pg_status` and `redis_start`/`redis_stop`/`redis_status`. Scripts are written with `cat > … <<'SCRIPT'` (quoted heredoc, so `$VAR` stays literal and resolves at call time). The service is **not** auto-started on shell entry — only initialized. Postgres creates a default database named after `$USER`; Redis listens on a Unix socket only and exports `REDIS_URL`. Postgres `shellHook` also migrates pre-existing configs to the new `/tmp` socket path via `sed`.
+
+### Swift / macOS GUI specifics
+
+`withSwift` takes a `gui ? false` flag. When true it adds `pkgs.apple-sdk_15` so SwiftUI/AppKit link against the macOS SDK without Xcode — **darwin-only** (evaluating `gui = true` on Linux fails by design). Two verified quirks the shellHook documents to the user: the nixpkgs Swift toolchain omits `dsymutil`, so `swift build` aborts on debug-symbol generation unless you pass `-Xswiftc -gnone`; and the swift-wrapper defaults the deployment target low, producing harmless `-mmacos-version-min`/"dylib built for newer macOS" warnings (set `platforms: [.macOS(.v14)]` in `Package.swift`). SwiftPM keeps build output project-local in `.build/`, so unlike Ruby/Node there is no global install dir to redirect under `$FLAKE_ROOT`. The `templates/swift/` flake is darwin-only and enables `gui = true`.
 
 ### Rust specifics
 
