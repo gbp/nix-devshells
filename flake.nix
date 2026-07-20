@@ -74,6 +74,10 @@
         path = ./templates/rust;
         description = "Rust dev shell";
       };
+      swift = {
+        path = ./templates/swift;
+        description = "Swift dev shell with macOS GUI (SwiftUI/AppKit) support";
+      };
       default = full;
     };
   };

@@ -129,6 +129,7 @@ Available templates:
 | `python` | Python |
 | `ruby` | Ruby |
 | `rust` | Rust |
+| `swift` | Swift with macOS GUI (SwiftUI/AppKit) support |
 
 Running without `#<name>` uses `full`:
 
