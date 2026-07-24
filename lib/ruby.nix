@@ -47,7 +47,7 @@ in {
 
     # Build environment
     export PKG_CONFIG_PATH="${pkgs.curl.dev}/lib/pkgconfig"
-    export LD_LIBRARY_PATH="${pkgs.curl}/lib:${pkgs.openssl_3}/lib"
+    export LD_LIBRARY_PATH="${pkgs.curl}/lib:${pkgs.openssl_3}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   '';
 
   # Expose for consumers that need it
