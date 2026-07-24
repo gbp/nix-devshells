@@ -23,7 +23,7 @@ To exercise a helper end-to-end, scaffold or open one of the `examples/` project
 
 `flake.nix` exposes `lib` with:
 - `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
-- `mkDevShell { pkgs, features, extraPackages?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it.
+- `mkDevShell { pkgs, features, extraPackages?, extraLibraries?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it. `extraLibraries` is for native libraries loaded via FFI/`dlopen` (e.g. libvips for ruby-vips): they join `buildInputs` and their lib dirs are prepended to `LD_LIBRARY_PATH` (which FFI consults on macOS too; `DYLD_*` is stripped by SIP).
 
 Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
 

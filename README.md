@@ -106,11 +106,17 @@ nix-devshells.lib.mkDevShell {
     (nix-devshells.lib.withRuby {inherit pkgs;})
   ];
   extraPackages = [pkgs.jq];
+  extraLibraries = [pkgs.vips]; # native libs for FFI (adds to LD_LIBRARY_PATH)
   extraShellHook = ''
     echo "Ready to go!"
   '';
 };
 ```
+
+Use `extraLibraries` for native libraries that gems or packages load via
+FFI/`dlopen` (e.g. ruby-vips or pyvips loading libvips). The dynamic loader
+does not search the Nix store, so `mkDevShell` prepends each library's lib
+directory to `LD_LIBRARY_PATH`, which FFI consults on both Linux and macOS.
 
 ## Templates
 

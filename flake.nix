@@ -24,10 +24,11 @@
         pkgs,
         features,
         extraPackages ? [],
+        extraLibraries ? [],
         extraShellHook ? "",
       }:
         pkgs.mkShell {
-          buildInputs = (builtins.concatLists (map (f: f.packages or []) features)) ++ extraPackages;
+          buildInputs = (builtins.concatLists (map (f: f.packages or []) features)) ++ extraPackages ++ extraLibraries;
 
           shellHook =
             ''
@@ -44,6 +45,12 @@
                 echo "$PWD"
               }
               export FLAKE_ROOT="$(_find_flake_root)"
+            ''
+            + pkgs.lib.optionalString (extraLibraries != []) ''
+              # FFI bindings (ruby-vips, pyvips, ...) dlopen libs by bare name and
+              # never search the Nix store. FFI consults LD_LIBRARY_PATH on macOS
+              # too (DYLD_* is stripped by SIP), so point it at each library dir.
+              export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath extraLibraries}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
             ''
             + (builtins.concatStringsSep "\n" (map (f: f.shellHook or "") features))
             + "\n"
