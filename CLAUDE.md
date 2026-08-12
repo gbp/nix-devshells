@@ -41,7 +41,7 @@ Versions are passed as human-readable strings and parsed to nixpkgs attribute na
 
 ### Dependency paths
 
-All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` for data and `/tmp/nix-pg-<hash>` for sockets (to avoid macOS 103-byte Unix socket path limit). Redis uses `$PWD/.redis/` for per-project data/socket isolation.
+All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` for data and `/tmp/nix-pg-<hash>` for sockets (to avoid macOS 103-byte Unix socket path limit). Redis does the same: `$PWD/.redis/` for data, conf and log, and `/tmp/nix-redis-<hash>` for the socket.
 
 ### Helper structure
 
@@ -49,7 +49,7 @@ Every helper sets `${LANG}_APP_ROOT="$FLAKE_ROOT"`, configures paths, and prepen
 
 ### Service helpers (Postgres, Redis)
 
-Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<service>/bin/` and prepend that dir to `$PATH`, giving the user lifecycle commands: `pg_start`/`pg_stop`/`pg_status` and `redis_start`/`redis_stop`/`redis_status`. Scripts are written with `cat > … <<'SCRIPT'` (quoted heredoc, so `$VAR` stays literal and resolves at call time). The service is **not** auto-started on shell entry — only initialized. Postgres creates a default database named after `$USER`; Redis listens on a Unix socket only and exports `REDIS_URL`. Postgres `shellHook` also migrates pre-existing configs to the new `/tmp` socket path via `sed`.
+Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<service>/bin/` and prepend that dir to `$PATH`, giving the user lifecycle commands: `pg_start`/`pg_stop`/`pg_status` and `redis_start`/`redis_stop`/`redis_status`. Scripts are written with `cat > … <<'SCRIPT'` (quoted heredoc, so `$VAR` stays literal and resolves at call time). The service is **not** auto-started on shell entry — only initialized. Postgres creates a default database named after `$USER`; Redis listens on a Unix socket only and exports `REDIS_URL`. Postgres `shellHook` also migrates pre-existing configs to the new `/tmp` socket path via `sed`; the Redis `shellHook` rewrites `redis.conf` on every entry instead, so the socket path can never drift from `$REDIS_SOCKET`.
 
 ### Swift / macOS GUI specifics
 
