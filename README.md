@@ -156,6 +156,7 @@ Available templates:
 | `ruby` | Ruby |
 | `rust` | Rust |
 | `swift` | Swift with macOS GUI (SwiftUI/AppKit) support |
+| `ios` | iOS with Xcode driven from the CLI |
 
 Running without `#<name>` uses `full`:
 

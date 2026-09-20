@@ -88,6 +88,10 @@
         path = ./templates/swift;
         description = "Swift dev shell with macOS GUI (SwiftUI/AppKit) support";
       };
+      ios = {
+        path = ./templates/ios;
+        description = "iOS dev shell driving Xcode from the CLI";
+      };
       default = full;
     };
   };
