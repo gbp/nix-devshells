@@ -22,10 +22,10 @@ To exercise a helper end-to-end, scaffold or open one of the `examples/` project
 ## Architecture
 
 `flake.nix` exposes `lib` with:
-- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
+- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift`, `withIos` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraLibraries?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it. `extraLibraries` is for native libraries loaded via FFI/`dlopen` (e.g. libvips for ruby-vips): they join `buildInputs` and their lib dirs are prepended to `LD_LIBRARY_PATH` (which FFI consults on macOS too; `DYLD_*` is stripped by SIP).
 
-Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
+Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. `lib/ios.nix` is the exception: it ships no toolchain, so it takes `xcodeApp` instead of a version. They are independent and composable in any combination.
 
 ## Conventions
 
@@ -54,6 +54,10 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 ### Swift / macOS GUI specifics
 
 `withSwift` takes a `gui ? false` flag. When true it adds `pkgs.apple-sdk_15` so SwiftUI/AppKit link against the macOS SDK without Xcode — **darwin-only** (evaluating `gui = true` on Linux fails by design). Two verified quirks the shellHook documents to the user: the nixpkgs Swift toolchain omits `dsymutil`, so `swift build` aborts on debug-symbol generation unless you pass `-Xswiftc -gnone`; and the swift-wrapper defaults the deployment target low, producing harmless `-mmacos-version-min`/"dylib built for newer macOS" warnings (set `platforms: [.macOS(.v14)]` in `Package.swift`). SwiftPM keeps build output project-local in `.build/`, so unlike Ruby/Node there is no global install dir to redirect under `$FLAKE_ROOT`. The `templates/swift/` flake is darwin-only and enables `gui = true`.
+
+### iOS specifics
+
+`withIos` does not provide a compiler. The iOS SDK only ships inside Xcode.app, so the helper wraps Xcode: it takes `xcodeApp ? "/Applications/Xcode.app"` (overridable at runtime via `$XCODE_APP`) and exports `DEVELOPER_DIR` when that app exists, which lets `xcodebuild`/`xcrun` work without `sudo xcode-select`. When it is missing the shellHook prints the `xcodes install` hint instead of failing. The packages are CLI-only Xcode companions: `xcodegen`, `xcodes`, `fastlane`, `libimobiledevice`, `ideviceinstaller`. `xcodegen` and `xcodes` are aarch64-darwin only in nixpkgs, so the `templates/ios/` flake targets that system alone. Never combine with `withSwift`: its nix `swift` would shadow Xcode's on `$PATH`.
 
 ### Rust specifics
 
