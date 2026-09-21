@@ -2,15 +2,49 @@
 {
   pkgs,
   xcodeApp ? "/Applications/Xcode.app",
-}: {
+}: let
+  # Release binary, not pkgs.xcodes: nixpkgs lags upstream and old
+  # versions cannot sign in to Apple.
+  xcodes = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+    pname = "xcodes";
+    version = "2.1.0";
+
+    src = pkgs.fetchurl {
+      url = "https://github.com/XcodesOrg/xcodes/releases/download/${finalAttrs.version}/xcodes.zip";
+      hash = "sha256-8VGa/pNKUT6F3Zsy/IcjlL7Lu2pB2xXZrDkmoJqJGIg=";
+    };
+
+    nativeBuildInputs = [pkgs.unzip pkgs.makeWrapper];
+    sourceRoot = ".";
+
+    # Stripping would break Apple's signature on the binary.
+    dontStrip = true;
+
+    installPhase = ''
+      runHook preInstall
+      install -D xcodes $out/bin/xcodes
+      wrapProgram $out/bin/xcodes --prefix PATH : ${pkgs.lib.makeBinPath [pkgs.aria2]}
+      runHook postInstall
+    '';
+
+    meta = {
+      description = "Install and switch between multiple versions of Xcode";
+      homepage = "https://github.com/XcodesOrg/xcodes";
+      changelog = "https://github.com/XcodesOrg/xcodes/releases/tag/${finalAttrs.version}";
+      license = pkgs.lib.licenses.mit;
+      platforms = pkgs.lib.platforms.darwin;
+      mainProgram = "xcodes";
+    };
+  });
+in {
   # The iOS SDK only ships inside Xcode.app, so this helper wraps Xcode's own
   # toolchain rather than replacing it. Everything here is CLI only: xcodegen
   # builds the .xcodeproj from a project.yml, xcodes installs Xcode.app without
   # opening it, and the libimobiledevice tools talk to a USB-connected device.
-  # xcodegen and xcodes are aarch64-darwin only in nixpkgs.
+  # xcodegen is aarch64-darwin only in nixpkgs.
   packages = [
     pkgs.xcodegen
-    pkgs.xcodes
+    xcodes
     pkgs.libimobiledevice
     pkgs.ideviceinstaller
     pkgs.fastlane

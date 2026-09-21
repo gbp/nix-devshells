@@ -11,7 +11,7 @@
     nixpkgs,
     nix-devshells,
   }: let
-    # xcodegen and xcodes are packaged for Apple Silicon only.
+    # xcodegen is packaged for Apple Silicon only.
     systems = ["aarch64-darwin"];
     forAllSystems = nixpkgs.lib.genAttrs systems;
   in {

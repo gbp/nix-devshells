@@ -57,7 +57,7 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 
 ### iOS specifics
 
-`withIos` does not provide a compiler. The iOS SDK only ships inside Xcode.app, so the helper wraps Xcode: it takes `xcodeApp ? "/Applications/Xcode.app"` (overridable at runtime via `$XCODE_APP`) and exports `DEVELOPER_DIR` when that app exists, which lets `xcodebuild`/`xcrun` work without `sudo xcode-select`. When it is missing the shellHook prints the `xcodes install` hint instead of failing. The packages are CLI-only Xcode companions: `xcodegen`, `xcodes`, `fastlane`, `libimobiledevice`, `ideviceinstaller`. `xcodegen` and `xcodes` are aarch64-darwin only in nixpkgs, so the `templates/ios/` flake targets that system alone. Never combine with `withSwift`: its nix `swift` would shadow Xcode's on `$PATH`.
+`withIos` does not provide a compiler. The iOS SDK only ships inside Xcode.app, so the helper wraps Xcode: it takes `xcodeApp ? "/Applications/Xcode.app"` (overridable at runtime via `$XCODE_APP`) and exports `DEVELOPER_DIR` when that app exists, which lets `xcodebuild`/`xcrun` work without `sudo xcode-select`. When it is missing the shellHook prints the `xcodes install` hint instead of failing. The packages are CLI-only Xcode companions: `xcodegen`, `xcodes`, `fastlane`, `libimobiledevice`, `ideviceinstaller`. `xcodes` is not `pkgs.xcodes`. nixpkgs builds it from source with pinned Swift deps, so it lags upstream, and Apple keeps breaking the login flow. `lib/ios.nix` packages the notarised release binary and pins its version and hash there. `xcodegen` is aarch64-darwin only in nixpkgs, so the `templates/ios/` flake targets that system alone. Never combine with `withSwift`: its nix `swift` would shadow Xcode's on `$PATH`.
 
 ### Rust specifics
 
