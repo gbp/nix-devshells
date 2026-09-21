@@ -85,7 +85,7 @@ You get a runnable executable, but not the Xcode IDE features: Interface Builder
 
 ### iOS apps from the CLI
 
-The iOS SDK only ships inside Xcode.app, so `withIos` wraps Xcode's own toolchain instead of replacing it. It adds `xcodegen` (generate the `.xcodeproj` from a `project.yml`), `xcodes` (install Xcode.app from the CLI), `fastlane`, and the libimobiledevice tools (`idevice_id`, `ideviceinstaller`) for USB installs. On entry it exports `DEVELOPER_DIR` so `xcodebuild` and `xcrun` find Xcode.app without `xcode-select`:
+The iOS SDK only ships inside Xcode.app, so `withIos` wraps Xcode's own toolchain instead of replacing it. It adds `xcodegen` (generate the `.xcodeproj` from a `project.yml`), `xcodes` (install Xcode.app from the CLI), `fastlane`, and the libimobiledevice tools (`idevice_id`, `ideviceinstaller`) for USB installs. It also puts an `xcodebuild` wrapper on `$PATH` that drops the nix stdenv's `CC`, `LD` and related variables, which xcodebuild would otherwise pick up as build settings and fail to link. On entry it exports `DEVELOPER_DIR` so `xcodebuild` and `xcrun` find Xcode.app without `xcode-select`:
 
 ```nix
 (nix-devshells.lib.withIos {inherit pkgs;})

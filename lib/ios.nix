@@ -36,6 +36,12 @@
       mainProgram = "xcodes";
     };
   });
+
+  # Ruby gem builds in this shell still need CC, so scope the unset to
+  # xcodebuild alone.
+  xcodebuild = pkgs.writeShellScriptBin "xcodebuild" ''
+    exec env -u CC -u CXX -u LD -u AR -u NM -u RANLIB -u STRIP /usr/bin/xcodebuild "$@"
+  '';
 in {
   # The iOS SDK only ships inside Xcode.app, so this helper wraps Xcode's own
   # toolchain rather than replacing it. Everything here is CLI only: xcodegen
@@ -45,6 +51,7 @@ in {
   packages = [
     pkgs.xcodegen
     xcodes
+    xcodebuild
     pkgs.libimobiledevice
     pkgs.ideviceinstaller
     pkgs.fastlane
