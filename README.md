@@ -59,6 +59,7 @@ separate `nixpkgs` input for anything else. Pass those packages through
 | `withRuby` | `version` | `"4.0"` | `"4.0.2"`, `"3.3.0"` |
 | `withRust` | `version` | `"latest"` | `"latest"` |
 | `withSwift` | `version` | `"latest"` | `"latest"` |
+| `withIos` | `xcodeApp` | `"/Applications/Xcode.app"` | `"/Applications/Xcode-16.app"` |
 
 Versions are parsed automatically -- pass natural version strings like `"3.12.1"` and the correct nixpkgs package is resolved.
 
@@ -81,6 +82,22 @@ swift build -Xswiftc -gnone
 ```
 
 You get a runnable executable, but not the Xcode IDE features: Interface Builder (`.storyboard`/`.xib`), asset catalogs (`.xcassets`), live Previews, or the Simulator. Write your UI in pure Swift code to stay within these bounds.
+
+### iOS apps from the CLI
+
+The iOS SDK only ships inside Xcode.app, so `withIos` wraps Xcode's own toolchain instead of replacing it. It adds `xcodegen` (generate the `.xcodeproj` from a `project.yml`), `xcodes` (install Xcode.app from the CLI), `fastlane`, and the libimobiledevice tools (`idevice_id`, `ideviceinstaller`) for USB installs. On entry it exports `DEVELOPER_DIR` so `xcodebuild` and `xcrun` find Xcode.app without `xcode-select`:
+
+```nix
+(nix-devshells.lib.withIos {inherit pkgs;})
+```
+
+Pass `xcodeApp` to point at a different install, or set `XCODE_APP` in the environment. If the app is missing the shell prints how to install it:
+
+```sh
+xcodes install --latest
+```
+
+This is aarch64-darwin only. Do not combine it with `withSwift`: the nixpkgs Swift toolchain would shadow Xcode's `swift` on `$PATH` and cannot target iOS.
 
 ## How it works
 
@@ -139,6 +156,7 @@ Available templates:
 | `ruby` | Ruby |
 | `rust` | Rust |
 | `swift` | Swift with macOS GUI (SwiftUI/AppKit) support |
+| `ios` | iOS with Xcode driven from the CLI |
 
 Running without `#<name>` uses `full`:
 
