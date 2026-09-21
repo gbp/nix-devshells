@@ -2,7 +2,9 @@
   description = "Reusable development environment helpers";
 
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgs-ruby.url = "github:bobvanderlinden/nixpkgs-ruby";
+    nixpkgs-ruby.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {

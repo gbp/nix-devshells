@@ -7,20 +7,18 @@ Modular, composable Nix flake helpers for development environments. Pick the lan
 ```nix
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nix-devshells.url = "github:gbp/nix-devshells";
   };
 
   outputs = {
     self,
-    nixpkgs,
     nix-devshells,
   }: let
     systems = ["aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux"];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
+    forAllSystems = nix-devshells.inputs.nixpkgs.lib.genAttrs systems;
   in {
     devShells = forAllSystems (system: let
-      pkgs = import nixpkgs {
+      pkgs = import nix-devshells.inputs.nixpkgs {
         inherit system;
         overlays = [nix-devshells.overlays.default];
       };
@@ -43,6 +41,11 @@ Then enter the shell:
 ```sh
 nix develop
 ```
+
+The helpers build with the nixpkgs pinned in nix-devshells. Every project on
+the same nix-devshells revision shares one build of Ruby and friends. Keep a
+separate `nixpkgs` input for anything else. Pass those packages through
+`extraPackages`.
 
 ## Available helpers
 
