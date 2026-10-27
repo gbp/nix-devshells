@@ -92,7 +92,7 @@ A `$FLAKE_ROOT` variable is set automatically, pointing to the directory contain
 
 | Helper | Install path |
 |---|---|
-| Node | `$FLAKE_ROOT/.npm-global/` (global installs) |
+| Node | `$FLAKE_ROOT/.npm-global/` (global installs), `$FLAKE_ROOT/.npm-cache/` (cache) |
 | Perl | `$FLAKE_ROOT/.perl5/` |
 | Postgres | `$PWD/.postgres/` |
 | Python | `$FLAKE_ROOT/.venv/` |

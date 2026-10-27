@@ -1,5 +1,6 @@
 .direnv/
 .gems/
+.npm-cache/
 .npm-global/
 .postgres/
 .redis/

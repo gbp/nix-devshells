@@ -16,8 +16,9 @@ in {
     # Node.js environment - uses $FLAKE_ROOT for shared packages
     export NODE_APP_ROOT="$FLAKE_ROOT"
     export NPM_CONFIG_PREFIX="$NODE_APP_ROOT/.npm-global"
+    export NPM_CONFIG_CACHE="$NODE_APP_ROOT/.npm-cache"
     export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
-    mkdir -p "$NPM_CONFIG_PREFIX"
+    mkdir -p "$NPM_CONFIG_PREFIX" "$NPM_CONFIG_CACHE"
   '';
 
   # Expose for consumers
