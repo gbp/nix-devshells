@@ -22,7 +22,7 @@ To exercise a helper end-to-end, scaffold or open one of the `examples/` project
 ## Architecture
 
 `flake.nix` exposes `lib` with:
-- `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
+- `withArduino`, `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraLibraries?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it. `extraLibraries` is for native libraries loaded via FFI/`dlopen` (e.g. libvips for ruby-vips): they join `buildInputs` and their lib dirs are prepended to `LD_LIBRARY_PATH` (which FFI consults on macOS too; `DYLD_*` is stripped by SIP).
 
 Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
@@ -41,7 +41,7 @@ Versions are passed as human-readable strings and parsed to nixpkgs attribute na
 
 ### Dependency paths
 
-All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.npm-cache/`, `.cargo/`, `.perl5/`). Exceptions: Postgres uses `$PWD/.postgres/` for data and `/tmp/nix-pg-<hash>` for sockets (to avoid macOS 103-byte Unix socket path limit). Redis does the same: `$PWD/.redis/` for data, conf and log, and `/tmp/nix-redis-<hash>` for the socket.
+All helpers store dependencies under `$FLAKE_ROOT` in dotfile directories (`.gems/`, `.venv/`, `.npm-global/`, `.npm-cache/`, `.cargo/`, `.perl5/`, `.arduino15/`, `.arduino/`). Exceptions: Postgres uses `$PWD/.postgres/` for data and `/tmp/nix-pg-<hash>` for sockets (to avoid macOS 103-byte Unix socket path limit). Redis does the same: `$PWD/.redis/` for data, conf and log, and `/tmp/nix-redis-<hash>` for the socket.
 
 ### Helper structure
 
@@ -54,6 +54,10 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 ### Swift / macOS GUI specifics
 
 `withSwift` takes a `gui ? false` flag. When true it adds `pkgs.apple-sdk_15` so SwiftUI/AppKit link against the macOS SDK without Xcode — **darwin-only** (evaluating `gui = true` on Linux fails by design). Two verified quirks the shellHook documents to the user: the nixpkgs Swift toolchain omits `dsymutil`, so `swift build` aborts on debug-symbol generation unless you pass `-Xswiftc -gnone`; and the swift-wrapper defaults the deployment target low, producing harmless `-mmacos-version-min`/"dylib built for newer macOS" warnings (set `platforms: [.macOS(.v14)]` in `Package.swift`). SwiftPM keeps build output project-local in `.build/`, so unlike Ruby/Node there is no global install dir to redirect under `$FLAKE_ROOT`. The `templates/swift/` flake is darwin-only and enables `gui = true`.
+
+### Arduino specifics
+
+`withArduino` takes `boardUrls`, `cores` and `libraries` lists instead of a version. Its shellHook installs them on entry, guarded by a stamp file `.arduino15/.installed-<hash>`. The hash covers the lists and the host system, so hosts that share `$FLAKE_ROOT`, such as macOS and a Linux VM, each install their own toolchains once. On Linux it rebuilds the nixpkgs FHS env around `arduino-cli.pureGoPkg` to add `python3`, which ESP8266 core scripts call as `/usr/bin/python3`.
 
 ### Rust specifics
 

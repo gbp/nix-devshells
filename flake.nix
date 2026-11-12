@@ -13,6 +13,7 @@
     ...
   }: {
     lib = {
+      withArduino = args: import ./lib/arduino.nix args;
       withNode = args: import ./lib/node.nix args;
       withPerl = args: import ./lib/perl.nix args;
       withPostgres = args: import ./lib/postgres.nix args;
