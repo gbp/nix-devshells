@@ -51,6 +51,7 @@ separate `nixpkgs` input for anything else. Pass those packages through
 
 | Helper | Arg | Default | Example |
 |---|---|---|---|
+| `withArduino` | `cores` | `[]` | `["arduino:avr"]` |
 | `withNode` | `version` | `"24"` | `"22"`, `"20.1.0"` |
 | `withPerl` | `version` | `"latest"` | `"latest"` |
 | `withPostgres` | `version` | `"16"` | `"17"`, `"15.2"` |
@@ -82,6 +83,23 @@ swift build -Xswiftc -gnone
 
 You get a runnable executable, but not the Xcode IDE features: Interface Builder (`.storyboard`/`.xib`), asset catalogs (`.xcassets`), live Previews, or the Simulator. Write your UI in pure Swift code to stay within these bounds.
 
+### Arduino with arduino-cli
+
+`withArduino` provides `arduino-cli`. It installs the cores and libraries you list on the first shell entry. It runs the install again only when a list or the host system changes:
+
+```nix
+(nix-devshells.lib.withArduino {
+  inherit pkgs;
+  boardUrls = ["https://arduino.esp8266.com/stable/package_esp8266com_index.json"];
+  cores = ["esp8266:esp8266@2.7.4"];
+  libraries = ["FastLED@3.4.0"];
+})
+```
+
+On Linux, `arduino-cli` runs in an FHS env with `python3`, because downloaded toolchains and core scripts expect standard paths.
+
+Some cores ship no native toolchain for every host. For example, no ESP8266 compiler runs natively on arm64 macOS. Compile those in an arm64 Linux machine, such as an OrbStack machine, with the same flake.
+
 ## How it works
 
 `mkDevShell` combines features into a single `mkShell`. Each feature provides:
@@ -92,6 +110,7 @@ A `$FLAKE_ROOT` variable is set automatically, pointing to the directory contain
 
 | Helper | Install path |
 |---|---|
+| Arduino | `$FLAKE_ROOT/.arduino15/` (cores), `$FLAKE_ROOT/.arduino/` (libraries) |
 | Node | `$FLAKE_ROOT/.npm-global/` (global installs), `$FLAKE_ROOT/.npm-cache/` (cache) |
 | Perl | `$FLAKE_ROOT/.perl5/` |
 | Postgres | `$PWD/.postgres/` |
