@@ -52,6 +52,7 @@ separate `nixpkgs` input for anything else. Pass those packages through
 | Helper | Arg | Default | Example |
 |---|---|---|---|
 | `withArduino` | `cores` | `[]` | `["arduino:avr"]` |
+| `withIos` | `xcodeApp` | `"/Applications/Xcode.app"` | `"/Applications/Xcode-16.app"` |
 | `withNode` | `version` | `"24"` | `"22"`, `"20.1.0"` |
 | `withPerl` | `version` | `"latest"` | `"latest"` |
 | `withPostgres` | `version` | `"16"` | `"17"`, `"15.2"` |
@@ -99,6 +100,22 @@ You get a runnable executable, but not the Xcode IDE features: Interface Builder
 On Linux, `arduino-cli` runs in an FHS env with `python3`, because downloaded toolchains and core scripts expect standard paths.
 
 Some cores ship no native toolchain for every host. For example, no ESP8266 compiler runs natively on arm64 macOS. Compile those in an arm64 Linux machine, such as an OrbStack machine, with the same flake.
+
+### iOS apps from the CLI
+
+The iOS SDK only ships inside Xcode.app, so `withIos` wraps Xcode's own toolchain instead of replacing it. It adds `xcodegen` (generate the `.xcodeproj` from a `project.yml`), `xcodes` (install Xcode.app from the CLI), `fastlane`, and the libimobiledevice tools (`idevice_id`, `ideviceinstaller`) for USB installs. It also puts an `xcodebuild` wrapper on `$PATH` that drops the nix stdenv's `CC`, `LD` and related variables, which xcodebuild would otherwise pick up as build settings and fail to link. On entry it exports `DEVELOPER_DIR` so `xcodebuild` and `xcrun` find Xcode.app without `xcode-select`:
+
+```nix
+(nix-devshells.lib.withIos {inherit pkgs;})
+```
+
+Pass `xcodeApp` to point at a different install, or set `XCODE_APP` in the environment. If the app is missing the shell prints how to install it:
+
+```sh
+xcodes install --latest
+```
+
+This is aarch64-darwin only. Do not combine it with `withSwift`: the nixpkgs Swift toolchain would shadow Xcode's `swift` on `$PATH` and cannot target iOS. `fastlane` brings its own Ruby, so with `withRuby` as well, check which `ruby` is first on `$PATH`.
 
 ## How it works
 
