@@ -8,7 +8,7 @@ nix-devshells is a Nix flake library that provides composable dev shell helpers.
 
 ## Commands
 
-There is no test suite or CI. Validate changes by evaluating the flake and entering shells:
+There is no test suite. CI runs `nix flake check --all-systems --no-build` on pushes to main and on pull requests. Validate changes by evaluating the flake and entering shells:
 
 ```sh
 nix flake check                          # evaluate flake outputs and a shell per helper
