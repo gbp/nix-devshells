@@ -170,6 +170,7 @@ Available templates:
 | Template | Contents |
 |---|---|
 | `full` (default) | Ruby, Python, Node, Postgres |
+| `ios` | iOS with Xcode driven from the CLI |
 | `node` | Node.js |
 | `python` | Python |
 | `ruby` | Ruby |
