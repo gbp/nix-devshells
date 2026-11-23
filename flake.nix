@@ -9,6 +9,7 @@
 
   outputs = {
     self,
+    nixpkgs,
     nixpkgs-ruby,
     ...
   }: {
@@ -62,6 +63,34 @@
     };
 
     overlays.default = nixpkgs-ruby.overlays.default;
+
+    # Each check writes the drvPath of a one-helper shell to a file. Getting
+    # the drvPath evaluates every package in the shell without building any,
+    # whereas `nix flake check` only looks at the top of a devShells output.
+    checks = nixpkgs.lib.genAttrs ["aarch64-darwin" "aarch64-linux" "x86_64-linux"] (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [self.overlays.default];
+      };
+      evalShell = name: feature:
+        pkgs.writeText "${name}-shell-drv" (builtins.unsafeDiscardStringContext
+          (self.lib.mkDevShell {
+            inherit pkgs;
+            features = [feature];
+          })
+          .drvPath);
+    in
+      builtins.mapAttrs evalShell {
+        arduino = self.lib.withArduino {inherit pkgs;};
+        node = self.lib.withNode {inherit pkgs;};
+        perl = self.lib.withPerl {inherit pkgs;};
+        postgres = self.lib.withPostgres {inherit pkgs;};
+        python = self.lib.withPython {inherit pkgs;};
+        redis = self.lib.withRedis {inherit pkgs;};
+        ruby = self.lib.withRuby {inherit pkgs;};
+        rust = self.lib.withRust {inherit pkgs;};
+        swift = self.lib.withSwift {inherit pkgs;};
+      });
 
     templates = rec {
       full = {

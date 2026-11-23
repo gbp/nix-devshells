@@ -11,7 +11,8 @@ nix-devshells is a Nix flake library that provides composable dev shell helpers.
 There is no test suite or CI. Validate changes by evaluating the flake and entering shells:
 
 ```sh
-nix flake check                          # evaluate flake outputs (catches eval errors)
+nix flake check                          # evaluate flake outputs and a shell per helper
+nix flake check --all-systems --no-build # the same for every system, without builds
 nix develop                              # enter the repo's own dev shell
 nix flake init --template ./#full        # scaffold from a template into an empty dir
 nix-shell -p alejandra --run 'alejandra .'   # format all Nix files
