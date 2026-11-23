@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  statuses: write
 
 jobs:
   update:
@@ -15,7 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/update-flake-lock@v29
+      - id: update
+        uses: DeterminateSystems/update-flake-lock@v29
         with:
           commit-msg: Bump flake inputs
           pr-title: Bump flake inputs
+      # Pull requests opened with the workflow token do not trigger the
+      # check workflow, and this run is tied to the main branch commit. So
+      # check the pull request branch here and post the result on its head
+      # commit, where the pull request shows it.
+      - if: steps.update.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git fetch origin update_flake_lock_action
+          git checkout FETCH_HEAD
+          state=success
+          nix flake check --all-systems --no-build || state=failure
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$(git rev-parse HEAD)" \
+            -f state="$state" -f context="flake check" -f target_url="$RUN_URL"
+          [ "$state" = success ]
