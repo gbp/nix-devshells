@@ -8,10 +8,11 @@ nix-devshells is a Nix flake library that provides composable dev shell helpers.
 
 ## Commands
 
-There is no test suite or CI. Validate changes by evaluating the flake and entering shells:
+There is no test suite. CI runs `nix flake check --all-systems --no-build` on pushes to main and on pull requests. Validate changes by evaluating the flake and entering shells:
 
 ```sh
-nix flake check                          # evaluate flake outputs (catches eval errors)
+nix flake check                          # evaluate flake outputs and a shell per helper
+nix flake check --all-systems --no-build # the same for every system, without builds
 nix develop                              # enter the repo's own dev shell
 nix flake init --template ./#full        # scaffold from a template into an empty dir
 nix-shell -p alejandra --run 'alejandra .'   # format all Nix files
@@ -61,7 +62,7 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 
 ### Rust specifics
 
-`withRust` also accepts `cargoPackage` (separate cargo override) and re-exports `rust`/`cargo` attributes for consumers. It bundles `clippy`, `rustfmt`, `pkg-config`, and `openssl_3` alongside the toolchain.
+`withRust` also accepts `cargoPackage` (separate cargo override) and re-exports `rust`/`cargo` attributes for consumers. It bundles `clippy`, `rustfmt`, `pkg-config`, and `openssl` alongside the toolchain.
 
 ## Adding a new helper
 

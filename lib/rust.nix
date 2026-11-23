@@ -24,7 +24,7 @@ in {
     pkgs.clippy
     pkgs.rustfmt
     pkgs.pkg-config
-    pkgs.openssl_3
+    pkgs.openssl
   ];
 
   shellHook = ''

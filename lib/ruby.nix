@@ -28,7 +28,7 @@ in {
     pkgs.libxml2
     pkgs.libxslt
     pkgs.libyaml
-    pkgs.openssl_3
+    pkgs.openssl
     pkgs.pkg-config
     pkgs.zlib
   ];
@@ -64,7 +64,7 @@ in {
 
     # Build environment
     export PKG_CONFIG_PATH="${pkgs.curl.dev}/lib/pkgconfig''${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-    export LD_LIBRARY_PATH="${pkgs.curl}/lib:${pkgs.openssl_3}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${pkgs.curl}/lib:${pkgs.openssl}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   '';
 
   # Expose for consumers that need it
