@@ -23,10 +23,10 @@ To exercise a helper end-to-end, scaffold or open one of the `examples/` project
 ## Architecture
 
 `flake.nix` exposes `lib` with:
-- `withArduino`, `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift` — each imports its corresponding `lib/*.nix`
+- `withArduino`, `withRuby`, `withNode`, `withPython`, `withPostgres`, `withRedis`, `withRust`, `withPerl`, `withSwift`, `withIos` — each imports its corresponding `lib/*.nix`
 - `mkDevShell { pkgs, features, extraPackages?, extraLibraries?, extraShellHook? }` — merges all features into a single `pkgs.mkShell`. It defines `_find_flake_root` and exports `$FLAKE_ROOT` **before** any feature shellHooks run, so helpers can depend on it. `extraLibraries` is for native libraries loaded via FFI/`dlopen` (e.g. libvips for ruby-vips): they join `buildInputs` and their lib dirs are prepended to `LD_LIBRARY_PATH` (which FFI consults on macOS too; `DYLD_*` is stripped by SIP).
 
-Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. They are independent and composable in any combination.
+Each `lib/*.nix` is a function `{ pkgs, <versionArg> ? <default>, package ? null } -> { packages, shellHook, ... }`. The optional `package` argument overrides version resolution with a custom derivation. `lib/ios.nix` is the exception: it ships no toolchain, so it takes `xcodeApp` instead of a version. They are independent and composable in any combination.
 
 ## Conventions
 
@@ -59,6 +59,10 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 ### Arduino specifics
 
 `withArduino` takes `boardUrls`, `cores` and `libraries` lists instead of a version. Its shellHook installs them on entry, guarded by a stamp file `.arduino15/.installed-<hash>`. The hash covers the lists and the host system, so hosts that share `$FLAKE_ROOT`, such as macOS and a Linux VM, each install their own toolchains once. On Linux it rebuilds the nixpkgs FHS env around `arduino-cli.pureGoPkg` to add `python3`, which ESP8266 core scripts call as `/usr/bin/python3`.
+
+### iOS specifics
+
+`withIos` does not provide a compiler. The iOS SDK only ships inside Xcode.app, so the helper wraps Xcode: it takes `xcodeApp ? "/Applications/Xcode.app"` (overridable at runtime via `$XCODE_APP`) and exports `DEVELOPER_DIR` when that app exists, which lets `xcodebuild`/`xcrun` work without `sudo xcode-select`. When it is missing the shellHook prints the `xcodes install` hint instead of failing. The packages are CLI-only Xcode companions: `xcodegen`, `xcodes`, `fastlane`, `libimobiledevice`, `ideviceinstaller`. `xcodegen` and `xcodes` are aarch64-darwin only in nixpkgs, so the `ios` check and the `templates/ios/` flake target that system alone. `fastlane` brings its own nixpkgs Ruby, so combined with `withRuby` two Rubies are on `$PATH`. Never combine with `withSwift`: its nix `swift` would shadow Xcode's on `$PATH`. `xcodebuild` on `$PATH` is a wrapper from `lib/ios.nix` that drops the nix stdenv's `CC`, `LD` and related variables before execing Xcode's own binary, because xcodebuild reads them as build settings and then fails to link. `xcrun xcodebuild` bypasses it.
 
 ### Rust specifics
 

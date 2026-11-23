@@ -15,6 +15,7 @@
   }: {
     lib = {
       withArduino = args: import ./lib/arduino.nix args;
+      withIos = args: import ./lib/ios.nix args;
       withNode = args: import ./lib/node.nix args;
       withPerl = args: import ./lib/perl.nix args;
       withPostgres = args: import ./lib/postgres.nix args;
@@ -90,6 +91,9 @@
         ruby = self.lib.withRuby {inherit pkgs;};
         rust = self.lib.withRust {inherit pkgs;};
         swift = self.lib.withSwift {inherit pkgs;};
+      }
+      // nixpkgs.lib.optionalAttrs (system == "aarch64-darwin") {
+        ios = evalShell "ios" (self.lib.withIos {inherit pkgs;});
       });
 
     templates = rec {
@@ -116,6 +120,10 @@
       swift = {
         path = ./templates/swift;
         description = "Swift dev shell with macOS GUI (SwiftUI/AppKit) support";
+      };
+      ios = {
+        path = ./templates/ios;
+        description = "iOS dev shell driving Xcode from the CLI";
       };
       default = full;
     };
