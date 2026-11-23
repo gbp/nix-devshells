@@ -61,7 +61,7 @@ Service shellHooks generate small wrapper scripts at runtime into `$PWD/.<servic
 
 ### Rust specifics
 
-`withRust` also accepts `cargoPackage` (separate cargo override) and re-exports `rust`/`cargo` attributes for consumers. It bundles `clippy`, `rustfmt`, `pkg-config`, and `openssl_3` alongside the toolchain.
+`withRust` also accepts `cargoPackage` (separate cargo override) and re-exports `rust`/`cargo` attributes for consumers. It bundles `clippy`, `rustfmt`, `pkg-config`, and `openssl` alongside the toolchain.
 
 ## Adding a new helper
 

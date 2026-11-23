@@ -16,7 +16,7 @@ in {
     pythonPackage
     pkgs.gcc
     pkgs.libffi
-    pkgs.openssl_3
+    pkgs.openssl
     pkgs.pkg-config
     pkgs.zlib
   ];
@@ -38,8 +38,8 @@ in {
     export PIP_REQUIRE_VIRTUALENV=true
 
     # Build environment for native extensions
-    export PKG_CONFIG_PATH="${pkgs.openssl_3.dev}/lib/pkgconfig:${pkgs.libffi.dev}/lib/pkgconfig''${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-    export LD_LIBRARY_PATH="${pkgs.openssl_3}/lib:${pkgs.libffi}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export PKG_CONFIG_PATH="${pkgs.openssl.dev}/lib/pkgconfig:${pkgs.libffi.dev}/lib/pkgconfig''${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+    export LD_LIBRARY_PATH="${pkgs.openssl}/lib:${pkgs.libffi}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   '';
 
   # Expose for consumers
